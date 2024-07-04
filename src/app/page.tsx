@@ -1,4 +1,6 @@
 "use client";
+import "regenerator-runtime/runtime";
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   IconBriefcase,
@@ -19,13 +21,51 @@ import {
   IconWriting,
 } from "@tabler/icons-react";
 import { OpenAI } from "openai";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
+function rtfToText(rtf: any) {
+  const rtfRegex = /\\([a-z]+)(-?\d+)? ?|[{}]|\\'([0-9a-fA-F]{2})|([^\\{}]+)/g;
+  let match;
+  let output = [];
+  let stack = [] as any;
+
+  while ((match = rtfRegex.exec(rtf)) !== null) {
+    if (match[0] === "{") {
+      stack.push(output.length);
+    } else if (match[0] === "}") {
+      output.splice(stack.pop(), 0);
+    } else if (match[0][0] === "\\") {
+      if (match[1] === "par" || match[1] === "line") {
+        output.push("\n");
+      } else if (match[1] === "tab") {
+        output.push("\t");
+      } else if (match[1] === "uc") {
+        // Unicode character count to skip
+        rtfRegex.lastIndex += Number(match[2]);
+      } else if (match[1] === "'") {
+        output.push(String.fromCharCode(parseInt(match[3], 16)));
+      }
+    } else {
+      output.push(match[0]);
+    }
+  }
+  return output.join("");
+}
+
 const Home: React.FC = () => {
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
   const [sourceText, setSourceText] = useState<string>("");
   const [targetText, setTargetText] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
@@ -50,6 +90,7 @@ const Home: React.FC = () => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = "en-US";
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = Array.from(event.results)
@@ -71,11 +112,14 @@ const Home: React.FC = () => {
 
   const handleVoiceRecording = () => {
     if (isRecording) {
-      recognitionRef.current?.stop();
+      // recognitionRef.current?.stop();
+      SpeechRecognition.startListening();
     } else {
-      recognitionRef.current?.start();
+      // recognitionRef.current?.start();
+      SpeechRecognition.stopListening();
     }
     setIsRecording(!isRecording);
+    console.log(transcript);
   };
 
   const handleAudioPlayback = (text: string) => {
@@ -88,7 +132,10 @@ const Home: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setSourceText(reader.result as string);
+        const rtfContent = reader.result as string;
+        const text = rtfToText(rtfContent);
+        setSourceText(text);
+        handleTranslate(text);
       };
       reader.readAsText(file);
     }
@@ -213,9 +260,10 @@ const Home: React.FC = () => {
                           onChange={handleFileUpload}
                           className="hidden"
                         />
-                        <label htmlFor="link-input" className="cursor-pointer">
-                          <IconLink size={21} />
-                        </label>
+                        <label
+                          htmlFor="link-input"
+                          className="cursor-pointer"
+                        ></label>
                         <input
                           type="text"
                           id="link-input"
@@ -269,7 +317,7 @@ const Home: React.FC = () => {
                           onClick={() => handleAudioPlayback(targetText)}
                         />
                       </span>
-                      <div className="flex flex-row space-x-2 cursor-pointer">
+                      <div className="flex flex-row items-center space-x-2 cursor-pointer">
                         <IconCopy size={22} onClick={handleCopyToClipboard} />
                         {copied && (
                           <span className="text-xs text-green-500">
