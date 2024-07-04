@@ -1,7 +1,13 @@
 import {
+  IconCopy,
   IconDeviceSpeaker,
+  IconLink,
   IconMicrophone,
+  IconPaperclip,
   IconSearch,
+  IconStar,
+  IconThumbDown,
+  IconThumbUp,
   IconVolume,
 } from "@tabler/icons-react";
 import Image from "next/image";
@@ -43,13 +49,15 @@ export default function Home() {
                       <span className="cursor-pointer flex space-x-2 flex-row">
                         <IconMicrophone size={22} className="text-gray-400" />
                         <IconVolume size={22} />
+                        <IconPaperclip size={21} />
+                        <IconLink size={21} />
                       </span>
-                      <span>fdsaf</span>
+                      <span className="text-sm">0 / 2000</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="relative z-10 flex space-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20">
+                <div className="relative z-10 flex flex-col space-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20">
                   <div className="flex-[1_0_0%] ">
                     <label className="block text-sm text-gray-700 font-medium dark:text-white">
                       <span className="sr-only">Target Language</span>
@@ -61,6 +69,19 @@ export default function Home() {
                       className="py-2.5 px-4 block w-full border-transparent rounded-lg  focus:outline-none dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400 "
                       placeholder="Target Language"
                     />
+                  </div>
+                  <div className="">
+                    <div className="flex flex-row justify-between w-full">
+                      <span className="cursor-pointer flex space-x-2 flex-row">
+                        <IconVolume size={22} />
+                      </span>
+                      <div className="flex flex-row space-x-2 cursor-pointer">
+                        <IconCopy size={22} />
+                        <IconThumbUp size={22} />
+                        <IconThumbDown size={22} />
+                        <IconStar size={22} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
