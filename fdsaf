@@ -1,108 +1,50 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
 import {
   IconBriefcase,
   IconBulb,
   IconChevronDown,
   IconCopy,
+  IconDeviceSpeaker,
   IconHeart,
   IconLanguage,
   IconLink,
   IconMicrophone,
   IconMoodSmile,
+  IconMoodSmileDizzy,
   IconPaperclip,
   IconSchool,
+  IconSearch,
   IconStar,
   IconThumbDown,
   IconThumbUp,
   IconVolume,
   IconWriting,
 } from "@tabler/icons-react";
-import { OpenAI } from "openai";
+import Image from "next/image";
+import React, { useState } from "react";
 
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-const Home: React.FC = () => {
-  const [sourceText, setSourceText] = useState<string>("");
-  const [targetText, setTargetText] = useState<string>("");
-  const [copied, setCopied] = useState<boolean>(false);
-  const [favorite, setFavorite] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [languages] = useState<string[]>([
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Chinese",
-  ]);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("Spanish");
-
-  const recognitionRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result) => result.transcript)
-          .join("");
-        setSourceText(transcript);
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-      };
-
-      return () => {
-        recognitionRef.current?.stop();
-      };
-    }
-  }, []);
+export default function Home() {
+  const [sourceText, setSourceText] = useState("");
+  const [targetText, setTargetText] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [favorite, setFavorite] = useState(false);
 
   const handleVoiceRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-    } else {
-      recognitionRef.current?.start();
-    }
-    setIsRecording(!isRecording);
+    // Implement voice recording logic
   };
 
-  const handleAudioPlayback = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
+  const handleAudioPlayback = () => {
+    // Implement audio playback logic
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSourceText(reader.result as string);
-      };
-      reader.readAsText(file);
-    }
+  const handleFileUpload = (e: any) => {
+    const file = e.target.files[0];
+    // Implement file transcription logic
   };
 
-  const handleLinkPaste = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLinkPaste = (e: any) => {
     const link = e.target.value;
-    try {
-      const response = await fetch(link);
-      const data = await response.text();
-      setSourceText(data);
-    } catch (error) {
-      console.error("Error fetching link content:", error);
-    }
+    // Implement link transcription logic
   };
 
   const handleCopyToClipboard = () => {
@@ -110,38 +52,6 @@ const Home: React.FC = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const handleTranslate = async (sourceText: any) => {
-    try {
-      const response = (await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: `You will be provided with a sentence. This sentense ${sourceText} Your tasks are to:
-        - Detect what language the sentence is in
-        - Translate the sentence into ${selectedLanguage}
-        Do not return anything other than the translated sentence.`,
-          },
-        ],
-      })) as any;
-
-      const data = response.choices[0].message.content;
-      setTargetText(data);
-    } catch (error) {
-      console.error("Error translating text:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (sourceText.trim()) {
-      const timeoutId = setTimeout(() => {
-        handleTranslate(sourceText);
-      }, 500); // Adjust the delay as needed
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [sourceText, selectedLanguage]);
 
   const handleLike = () => {
     // Implement like logic
@@ -153,6 +63,7 @@ const Home: React.FC = () => {
 
   const handleFavorite = () => {
     setFavorite(!favorite);
+    // Save favorite to local storage
     if (!favorite) {
       localStorage.setItem("favoriteTranslation", targetText);
     } else {
@@ -161,10 +72,11 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="w-full dark:bg-black bg-white dark:bg-dot-white/[0.2] bg-dot-black/[0.2] relative flex items-center justify-center">
+    <div className=" w-full dark:bg-black bg-white  dark:bg-dot-white/[0.2] bg-dot-black/[0.2] relative flex items-center justify-center">
+      {/* Radial gradient for the container to give a faded look */}
       <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
 
-      <div className="relative overflow-hidden h-screen">
+      <div className="relative overflow-hidden h-screen ">
         <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-24">
           <div className="text-center">
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 dark:text-neutral-200">
@@ -178,7 +90,7 @@ const Home: React.FC = () => {
             <div className="mt-7 sm:mt-12 mx-auto max-w-3xl relative">
               <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
                 <div className="relative z-10 flex flex-col space-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20">
-                  <div className="flex-[1_0_0%]">
+                  <div className="flex-[1_0_0%] ">
                     <label className="block text-sm text-gray-700 font-medium dark:text-white">
                       <span className="sr-only">Source Language</span>
                     </label>
@@ -186,13 +98,13 @@ const Home: React.FC = () => {
                       rows={5}
                       name="source-language"
                       id="source-language"
-                      className="py-2.5 px-4 border-none focus:outline-none block w-full border-transparent rounded-lg dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400"
+                      className="py-2.5 px-4 border-none focus:outline-none block w-full border-transparent rounded-lg  dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400 "
                       placeholder="Source Language"
                       value={sourceText}
                       onChange={(e) => setSourceText(e.target.value)}
                     />
                   </div>
-                  <div>
+                  <div className="">
                     <div className="flex flex-row justify-between w-full">
                       <span className="cursor-pointer flex space-x-2 flex-row">
                         <IconMicrophone
@@ -200,28 +112,14 @@ const Home: React.FC = () => {
                           className="text-gray-400"
                           onClick={handleVoiceRecording}
                         />
-                        <IconVolume
-                          size={22}
-                          onClick={() => handleAudioPlayback(sourceText)}
-                        />
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <IconPaperclip size={21} />
-                        </label>
+                        <IconVolume size={22} onClick={handleAudioPlayback} />
+                        <IconPaperclip size={21} />
                         <input
                           type="file"
-                          id="file-upload"
                           onChange={handleFileUpload}
                           className="hidden"
                         />
-                        <label htmlFor="link-input" className="cursor-pointer">
-                          <IconLink size={21} />
-                        </label>
-                        <input
-                          type="text"
-                          id="link-input"
-                          className="hidden"
-                          onChange={handleLinkPaste}
-                        />
+                        <IconLink size={21} onClick={handleLinkPaste} />
                       </span>
                       <span className="text-sm">
                         {sourceText.length} / 2000
@@ -231,7 +129,7 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className="relative z-10 flex flex-col space-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20">
-                  <div className="flex-[1_0_0%]">
+                  <div className="flex-[1_0_0%] ">
                     <label className="block text-sm text-gray-700 font-medium dark:text-white">
                       <span className="sr-only">Target Language</span>
                     </label>
@@ -239,35 +137,20 @@ const Home: React.FC = () => {
                       rows={5}
                       name="target-language"
                       id="target-language"
-                      className="py-2.5 px-4 block w-full border-transparent rounded-lg focus:outline-none dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400"
+                      className="py-2.5 px-4 block w-full border-transparent rounded-lg  focus:outline-none dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400 "
                       placeholder="Target Language"
                       value={targetText}
                       onChange={(e) => setTargetText(e.target.value)}
                     />
                   </div>
-                  <div>
+                  <div className="">
                     <div className="flex flex-row justify-between w-full">
                       <span className="cursor-pointer flex items-center space-x-2 flex-row">
-                        <span className="cursor-pointer rounded-full space-x-1 pl-2 bg-[#000000] flex items-center flex-row">
+                        <span className="bg-[#000000] px-3 flex flex-row rounded-full py-1">
                           <IconLanguage size={20} />
-                          <select
-                            value={selectedLanguage}
-                            onChange={(e) =>
-                              setSelectedLanguage(e.target.value)
-                            }
-                            className="bg-[#000000]  flex flex-row rounded-full py-1 text-white"
-                          >
-                            {languages.map((language) => (
-                              <option key={language} value={language}>
-                                {language}
-                              </option>
-                            ))}
-                          </select>
+                          <IconChevronDown size={20} />
                         </span>
-                        <IconVolume
-                          size={22}
-                          onClick={() => handleAudioPlayback(targetText)}
-                        />
+                        <IconVolume size={22} />
                       </span>
                       <div className="flex flex-row space-x-2 cursor-pointer">
                         <IconCopy size={22} onClick={handleCopyToClipboard} />
@@ -288,9 +171,53 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </div>
+              <div className="hidden z-[200] md:block absolute top-0 end-0 -translate-y-12 translate-x-20">
+                <svg
+                  className="w-16 h-auto text-orange-500"
+                  width="121"
+                  height="135"
+                  viewBox="0 0 121 135"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164"
+                    stroke="currentColor"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M33.6761 112.104C44.6984 98.1239 74.2618 57.6776 83.4821 5"
+                    stroke="currentColor"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M50.5525 130C68.2064 127.495 110.731 117.541 116 78.0874"
+                    stroke="currentColor"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
 
-              <div className="hidden z-[200] md:block absolute top-0 end-0 -translate-y-12 translate-x-20"></div>
-              <div className="hidden md:block absolute bottom-0 start-0 translate-y-10 -translate-x-32"></div>
+              <div className="hidden md:block absolute bottom-0 start-0 translate-y-10 -translate-x-32">
+                <svg
+                  className="w-40 h-auto text-cyan-500"
+                  width="347"
+                  height="188"
+                  viewBox="0 0 347 188"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 82.4591C54.7956 92.8751 30.9771 162.782 68.2065 181.385C112.642 203.59 127.943 78.57 122.161 25.5053C120.504 2.2376 93.4028 -8.11128 89.7468 25.5053C85.8633 61.2125 130.186 199.678 180.982 146.248L214.898 107.02C224.322 95.4118 242.9 79.2851 258.6 107.02C274.299 134.754 299.315 125.589 309.861 117.539L343 93.4426"
+                    stroke="currentColor"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
             </div>
 
             <div className="mt-10 sm:mt-20">
@@ -342,6 +269,4 @@ const Home: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Home;
+}
