@@ -17,7 +17,8 @@ const useTranslate = (sourceText, selectedLanguage) => {
           messages: [
             {
               role: "user",
-              content: `You will be provided with a sentence. This sentence: ${sourceText}. Your tasks are to:
+              content: `You will be provided with a sentence. This sentence: 
+              ${sourceText}. Your tasks are to:
               - Detect what language the sentence is in
               - Translate the sentence into ${selectedLanguage}
               Do not return anything other than the translated sentence.`,

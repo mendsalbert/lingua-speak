@@ -8,15 +8,16 @@ import {
   IconThumbUp,
   IconVolume,
 } from "@tabler/icons-react";
-import SpeechRecognitionComponent from "../components/SpeechRecognition/SpeechRecognition";
-import TextArea from "../components/Inputs/TextArea";
-import FileUpload from "../components/Inputs/FileUpload";
-import LinkPaste from "../components/Inputs/LinkPaste";
-import LanguageSelector from "../components/Inputs/LanguageSelector";
-import useTranslate from "../hooks/useTranslate";
-import { rtfToText } from "../utils/rtfToText";
-import SvgDecorations from "../components/SvgDecorations";
-import CategoryLinks from "../components/CategoryLinks";
+import SpeechRecognitionComponent from "@/components/SpeechRecognition/SpeechRecognition";
+import TextArea from "@/components/Inputs/TextArea";
+import FileUpload from "@/components/Inputs/FileUpload";
+import LinkPaste from "@/components/Inputs/LinkPaste";
+import LanguageSelector from "@/components/Inputs/LanguageSelector";
+import useTranslate from "@/hooks/useTranslate";
+import { rtfToText } from "@/utils/rtfToText";
+
+import SvgDecorations from "@/components/SvgDecorations";
+import CategoryLinks from "@/components/categoryLinks";
 
 const Home: React.FC = () => {
   const [sourceText, setSourceText] = useState<string>("");
